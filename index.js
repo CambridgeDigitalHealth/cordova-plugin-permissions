@@ -5,16 +5,9 @@ class Permissions {
 
     const fn = (fnName) => {
       return (data) =>
-        new Promise((resolve, reject) => {
-          this.isReady()
-            .then(() => {
-              window.permissions[fnName](data).then((result) => {
-                resolve(result);
-              });
-            })
-            .catch((e) => {
-              reject(e);
-            });
+        new Promise(async (resolve, reject) => {
+          await this.isReady();
+          window.permissions[fnName](data, resolve, reject);
         });
     };
     this.request = fn('request');
