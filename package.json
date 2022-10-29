@@ -1,0 +1,19 @@
+{
+  "name": "cordova-plugin-permissions",
+  "version": "0.0.2",
+  "description": "request permissions",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "cordova": {
+    "id": "cordova-plugin-permissions",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "author": "Joao Ladeiras",
+  "license": "MIT"
+}

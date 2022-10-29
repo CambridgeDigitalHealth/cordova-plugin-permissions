@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-permissions" version="0.0.1" 
+  xmlns="http://apache.org/cordova/ns/plugins/1.0">
+  <name>Permissions</name>
+
+  <js-module name="Permissions" src="www/Permissions.js">
+    <clobbers target="window.permissions" />
+  </js-module>
+
+  <platform name="ios">
+    <hook src="src/add-swift-support.js" type="after_prepare" />
+    <hook src="src/add-swift-support.js" type="after_platform_add" />
+    <hook src="src/add-swift-support.js" type="after_plugin_add" />
+
+    <config-file parent="/*" target="config.xml">
+      <feature name="Permissions">
+        <param name="ios-package" value="Permissions" />
+      </feature>
+    </config-file>
+
+    <source-file src="src/ios/Permissions.swift" />
+  </platform>
+</plugin>
