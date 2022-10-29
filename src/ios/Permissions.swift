@@ -2,7 +2,8 @@ import Foundation
 import AVFoundation
 import Photos
 
-@objc(Permissions) class Permissions : CDVPlugin {
+@objc(Permissions)
+class Permissions : CDVPlugin {
     @objc(success:)
     private func success(command: CDVInvokedUrlCommand) {
         let result = CDVPluginResult(status: CDVCommandStatus_OK)
@@ -19,51 +20,70 @@ import Photos
         self.commandDelegate.send(result, callbackId: command.callbackId)
     }
 
-    // @objc(check:)
-    // public func check(command: CDVInvokedUrlCommand) {
-    //     let permission = command.arguments[0] as! String
-    //     var status = ""
-    //     switch permission {
-    //     case "camera":
-    //         status = AVCaptureDevice.authorizationStatus(for: AVMediaType.video).rawValue.description
-    //     case "photos":
-    //         status = PHPhotoLibrary.authorizationStatus().rawValue.description
-    //     default:
-    //         status = "unknown"
-    //     }
-    //     let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: status)
-    //     self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
-    // }
-
     @objc(request:)
     public func request(command: CDVInvokedUrlCommand) {
-        self.wait(command: command)
         let permission = command.arguments[0] as! String
         switch permission {
         case "camera":
-            AVCaptureDevice.requestAccess(for: AVMediaType.video) { status in
-                switch status {
-                    case true:
-                        self.success(command: command)
-                    case false:
-                        self.failure(command: command, message: "Permission denied")
-                }
-            }
+            requestCamera(command: command)
         case "photos":
-            PHPhotoLibrary.requestAuthorization { status in
-                switch status {
-                    case .authorized:
-                        self.success(command: command)
-                    case .denied:
-                        self.failure(command: command, message: "Permission denied")
-                    case .notDetermined:
-                        self.failure(command: command, message: "Permission not determined")
-                    default:
-                        self.success(command: command)
-                }
-            }
+            requestPhotos(command: command)
         default:
-            self.failure(command: command, message: "Permission unknown")
+            failure(command: command, message: "Unknown permission: \(permission)")
+        }
+    }
+
+    @objc(checkCamera)
+    private func checkCamera() -> Bool {
+        let status = AVCaptureDevice.authorizationStatus(for: AVMediaType.video)
+        switch status {
+        case .authorized:
+            return true
+        default:
+            return false
+        }
+    }
+
+    @objc(requestCamera:)
+    private func requestCamera(command: CDVInvokedUrlCommand) {
+        if checkCamera() {
+            success(command: command)
+            return
+        }
+
+        AVCaptureDevice.requestAccess(for: AVMediaType.video) { (granted) in
+            if granted {
+                self.success(command: command)
+            } else {
+                self.failure(command: command, message: "Permission denied")
+            }
+        }
+    }
+
+    @objc(checkPhotos)
+    private func checkPhotos() -> Bool {
+        let status = PHPhotoLibrary.authorizationStatus()
+        switch status {
+        case .authorized:
+            return true
+        default:
+            return false
+        }
+    }
+
+    @objc(requestPhotos:)
+    private func requestPhotos(command: CDVInvokedUrlCommand) {
+        if checkPhotos() {
+            success(command: command)
+            return
+        }
+
+        PHPhotoLibrary.requestAuthorization { (status) in
+            if status == .authorized {
+                self.success(command: command)
+            } else {
+                self.failure(command: command, message: "Permission denied")
+            }
         }
     }
 }
